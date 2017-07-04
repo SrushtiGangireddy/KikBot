@@ -1,0 +1,188 @@
+String[] spamDetection(String[][] messages, String[] spamSignals) {
+    
+    int m=messages.length;
+    int n=messages[0].length;
+    
+    boolean spam1=false;
+    boolean spam2=false;
+    boolean spam3=false;
+    boolean spam4=false;
+    
+    ArrayList<String> spam2Users=new ArrayList<String>();
+    
+    ArrayList<String> messageContent=new ArrayList<String>();
+    
+    TreeSet<String> uniqueMessageContent=new TreeSet<String>();
+    
+    ArrayList<String> spamSignalsDetected=new ArrayList<String>();
+    
+    TreeSet<String> signalsDetected=new TreeSet<String>();
+    
+    int spamSignalCounter=0;
+    
+    int counter1=0;
+    int wholeCounter1=0;
+    
+    HashMap<String,ArrayList<String>> spam2Check=new HashMap<String,ArrayList<String>>();
+
+    
+    
+    for(int i=0;i<m;i++){
+        wholeCounter1++;
+        messageContent.add(messages[i][0]);
+        uniqueMessageContent.add(messages[i][0]);
+        
+        for(String spamsig:spamSignals){
+            if(messages[i][0].toLowerCase().contains(spamsig.toLowerCase())){
+                spamSignalCounter++;
+                spamSignalsDetected.add(spamsig);
+                signalsDetected.add(spamsig);
+                break;  
+            }
+        }
+        
+        String[] words=messages[i][0].split(" ");
+        String user=messages[i][1];
+        if(words.length < 5){
+            counter1++;
+        }   
+        
+        if(spam2Check.containsKey(user)){
+            ArrayList<String> temp=spam2Check.get(user);
+            temp.add(messages[i][0]);
+            spam2Check.put(user,temp);
+        }else{
+            ArrayList<String> temp=new ArrayList<String>();
+            temp.add(messages[i][0]);
+            spam2Check.put(user,temp);
+        }
+        
+    }
+    
+    System.out.println(wholeCounter1+" "+counter1);
+    
+    if((wholeCounter1==counter1) | (((float)counter1/wholeCounter1)*100) >= 90){
+        spam1=true;
+    }
+    
+    
+    String[] result=new String[4];
+    
+    
+     if(spam1){
+        if(wholeCounter1==counter1){
+            result[0]="failed: "+"1/1";
+        }else{
+             
+              int smaller = counter1 < wholeCounter1 ? counter1 : wholeCounter1;
+        int HCF = -1;
+        for (int i = smaller; i > 0; --i) {
+            if (counter1%i==0&&wholeCounter1%i==0) {
+                HCF = i;
+             //   System.out.println("Reduced form: "+(counter1/HCF)+"/"+(wholeCounter1/HCF));
+                break;
+            }
+        }
+            
+            result[0]="failed: "+(counter1/HCF)+"/"+(wholeCounter1/HCF);
+        }
+    }else{
+         result[0]="passed";
+     }
+    
+    Iterator spam2IT=spam2Check.entrySet().iterator();
+    
+    while(spam2IT.hasNext()){
+        Map.Entry pair=(Map.Entry)spam2IT.next();
+        
+        String user=(String)pair.getKey();
+        ArrayList<String> content=(ArrayList<String>)pair.getValue();
+        TreeSet<String> uniqueContent=new TreeSet<String>();
+        int size=content.size();
+        
+        if((size >= 2)){
+            
+            for(String mes:content){
+                uniqueContent.add(mes);
+            }
+            
+            for(String uniqueMes:uniqueContent){
+                int freq=Collections.frequency(content,uniqueMes);
+              //  System.out.println(uniqueMes+" Freq "+freq+" size "+size);
+                if(((float)freq/size)*100 >= 50){
+                    spam2=true;
+                    spam2Users.add(user);
+                }
+            }
+            
+        }
+        
+    }
+    
+    if(spam2){
+        if(spam2Users.size() == 0){
+            
+        }else{
+            Collections.sort(spam2Users);
+            String spam2U="";
+            for(String us:spam2Users){
+                if(spam2U.length() == 0){
+                    spam2U=" "+us;
+                }else{
+                    spam2U=spam2U+" "+us;
+                }
+            }
+            result[1]="failed:"+spam2U;
+        }
+    }else{
+        result[1]="passed";
+    }
+    
+    int wholeMessageSize=messageContent.size();
+    if(wholeMessageSize >= 2){
+        for(String umc:uniqueMessageContent){
+            int fre=Collections.frequency(messageContent,umc);
+                if(((float)fre/wholeMessageSize)*100 >= 50){
+                        result[2]="failed: "+umc;
+                        spam3=true;
+                }
+    }
+    
+    }
+    
+    
+    if(!spam3){
+        result[2]="passed";
+    }
+    
+    if(((float)spamSignalCounter/wholeMessageSize)*100 >= 50){
+        Collections.sort(spamSignalsDetected);
+        
+        String spamDetected="";
+        
+        for(String sd:signalsDetected){
+            if(spamDetected.length() == 0){
+                spamDetected=" "+sd;
+            }else{
+                spamDetected=spamDetected+" "+sd;
+            }
+            
+        }
+        
+        
+        result[3]="failed:"+spamDetected;
+        
+    }else{
+        result[3]="passed";
+    }
+    
+  
+    for(String res:result){
+        System.out.println(res);
+    }
+    
+    
+    
+    
+    return result;
+}
