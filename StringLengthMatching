@@ -1,0 +1,14 @@
+String integerToStringOfFixedWidth(int number, int width) {
+    StringBuffer sb=new StringBuffer();
+    String num=String.valueOf(number);
+    if((num.length() < width)){
+        for(int i=num.length();i<width;i++){
+            sb.append("0");
+        }sb.append(num);
+    }else{int cut=num.length()-width;
+          for(int i=cut;i<num.length();i++){
+              sb.append(Character.toString(num.charAt(i)));
+          }
+    }
+    return sb.toString();    
+}
